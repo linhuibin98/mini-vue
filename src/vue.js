@@ -58,9 +58,15 @@ class Compile {
       if (this.isElementNode(node)) {
         this.compileElement(node);
       }
+
+      // 文本节点
+      if (this.isTextNode(node)) {
+        this.compileText(node);
+      };
     });
   }
 
+  // 编译元素节点
   compileElement (node) {
     // 获取元素上所有的属性
     let attributes = node.attributes;
@@ -74,18 +80,20 @@ class Compile {
         let type = attrName.slice(2); // 例如: v-html取html
         let expression = attr.value;
 
-        if (type === 'html') {
-          node.innerHTML = this.vm.$data[expression];
+        // 是否为绑定事件
+        if (this.isEventDirective(type)) {
+          //
+        } else {
+          CompileUtil[type] && CompileUtil[type](node, expression, this.vm);
         }
       }
     })
   }
 
-  // 解析指令
-  CompileUtil () {
+  // 编译文本节点
+  compileText (node) {
 
   }
-
 
   // 工具方法
 
@@ -107,5 +115,32 @@ class Compile {
   // 判断标签上的属性是否是Vue指令, 即以 'v-'开头的属性
   isDirective (attrName) {
     return attrName.startsWith('v-'); 
+  }
+
+  // 是否是v-on绑定的事件
+  isEventDirective (type) {
+    // 例如, type = on:input
+    return type.split(':')[0] === 'on';
+  }
+}
+
+
+let CompileUtil = {
+  text (node, expression, vm) {
+    node.textContent = this.getVMValue(vm, expression);
+  },
+
+  html (node, expression, vm) {
+    node.innerHTML = this.getVMValue(vm, expression);
+  },
+  // 用于获取vm $data中的数据
+  getVMValue (vm, expression) {
+    let data = vm.$data;
+
+    expression.split('.').forEach(key => {
+      data = data[key];
+    });
+
+    return data;
   }
 }
