@@ -30,11 +30,11 @@ class Compile {
       this.compile(fragment);
 
       // 3. 将编译后的fragment添加到页面
-      this.el.appendChild = fragment
+      this.el.appendChild(fragment);
     }
   }
 
-  // 核心方法: 创建fragment
+  // 创建fragment
   node2fragment(node) {
     let fragment = document.createDocumentFragment();
 
@@ -47,15 +47,65 @@ class Compile {
     return fragment;
   }
 
+  // 编译fragment
   compile (fragment) {
-    
+    let childNodes = fragment.childNodes;
+
+    this.toArray(childNodes).forEach(node => {
+      // 编译子节点
+
+      // 若是元素节点, 则需要编译指令, 像v-bind、v-text、v-html
+      if (this.isElementNode(node)) {
+        this.compileElement(node);
+      }
+    });
   }
 
-  // 工具方法, 将类数组转为数组
+  compileElement (node) {
+    // 获取元素上所有的属性
+    let attributes = node.attributes;
+
+    this.toArray(attributes).forEach(attr => {
+      let attrName = attr.name;
+
+      // 判断是否是指令
+      if (this.isDirective(attrName)) {
+        // 解析指令, 值可能表示变量, 也可能是有返回值的表达式
+        let type = attrName.slice(2); // 例如: v-html取html
+        let expression = attr.value;
+
+        if (type === 'html') {
+          node.innerHTML = this.vm.$data[expression];
+        }
+      }
+    })
+  }
+
+  // 解析指令
+  CompileUtil () {
+
+  }
+
+
+  // 工具方法
+
+  // 将类数组转为数组
   toArray (likeArray) {
     return Array.prototype.slice.call(likeArray);
   }
 
+  // 是否为元素节点
+  isElementNode (node) {
+    return node.nodeType === 1;
+  }
 
-
+  // 是否为文本节点
+  isTextNode (node) {
+    return node.nodeType === 3;
+  }
+  
+  // 判断标签上的属性是否是Vue指令, 即以 'v-'开头的属性
+  isDirective (attrName) {
+    return attrName.startsWith('v-'); 
+  }
 }
