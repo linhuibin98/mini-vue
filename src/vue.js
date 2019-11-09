@@ -63,6 +63,14 @@ class Compile {
       if (this.isTextNode(node)) {
         this.compileText(node);
       };
+      
+      console.dir(node)
+
+      // 如果当前节点还存在子节点, 递归编译
+      if (node.childNodes && node.childNodes.length > 0) {
+        console.log(node)
+        this.compile(node);
+      }
     });
   }
 
