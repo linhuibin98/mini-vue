@@ -21,14 +21,41 @@ class Compile {
     // vm, Vue的实例
     this.vm = vm;
 
+    // 解析编译
+    if (this.el) {
+      // 1.将el中所有的子节点放入内存,即文档碎片中
+      let fragment = this.node2fragment(this.el);
+      
+      // 2. 在内存中解析fragment
+      this.compile(fragment);
+
+      // 3. 将编译后的fragment添加到页面
+      this.el.appendChild = fragment
+    }
   }
 
   // 核心方法: 创建fragment
   node2fragment(node) {
     let fragment = document.createDocumentFragment();
 
-    // 将
+    let childNodes = node.childNodes;
+
+    // 将el中所有的子节点放入fragment中
+    this.toArray(childNodes).forEach(node => {
+      fragment.appendChild(node);
+    });
+    return fragment;
   }
+
+  compile (fragment) {
+    
+  }
+
+  // 工具方法, 将类数组转为数组
+  toArray (likeArray) {
+    return Array.prototype.slice.call(likeArray);
+  }
+
 
 
 }
