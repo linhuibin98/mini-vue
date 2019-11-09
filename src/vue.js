@@ -61,14 +61,14 @@ class Compile {
 
       // 文本节点
       if (this.isTextNode(node)) {
-        this.compileText(node);
+        // 空节点不编译, 压缩文件不需要这步
+        if (node.textContent.trim()) {
+          this.compileText(node);
+        }
       };
-      
-      console.dir(node)
 
       // 如果当前节点还存在子节点, 递归编译
       if (node.childNodes && node.childNodes.length > 0) {
-        console.log(node)
         this.compile(node);
       }
     });
@@ -100,7 +100,7 @@ class Compile {
 
   // 编译文本节点
   compileText (node) {
-
+    CompileUtil.mustache(node, this.vm);
   }
 
   // 工具方法
@@ -134,6 +134,20 @@ class Compile {
 
 
 let CompileUtil = {
+  // 解析文本节点大胡子语法：{{title}}
+  mustache (node, vm) {
+    let text = node.textContent;
+
+    let reg = /\{\{(.+)\}\}/g;
+
+    if (reg.test(text)) {
+      // 编译
+      node.textContent = text.replace(reg, (match, p1) => {
+        console.log(this.getVMValue(vm, p1));
+        return this.getVMValue(vm, p1);
+      });
+    }
+  },
   text (node, expression, vm) {
     node.textContent = this.getVMValue(vm, expression);
   },
