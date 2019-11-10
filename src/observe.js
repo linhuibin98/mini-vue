@@ -23,16 +23,20 @@ class Observe {
   // 数据劫持
   defineReactive (obj, key, value) {
     let self = this;
+    let dep = new Dep();
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
       get () {
+        // data中每个数据都应该维护一个dev对象, 储存哪个节点依赖了该数据
+        Dep.target && dep.addSub(Dep.target);
         return value;
       },
       set (newVal) {
         if (value === newVal) return;
         value = newVal;
-
+        dep.notify();
+        // window.watcher.update()
         // 若果newVal是一个对象, 也需要进行劫持
         self.walk(newVal);
       }

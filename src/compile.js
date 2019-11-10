@@ -117,7 +117,6 @@ class Compile {
   }
 }
 
-
 let CompileUtil = {
   // 解析文本节点大胡子语法：{{title}}
   mustache (node, vm) {
@@ -126,25 +125,39 @@ let CompileUtil = {
     let reg = /\{\{(.+?)\}\}/g;
 
     if (reg.test(text)) {
+
       // 编译
       node.textContent = text.replace(reg, (match, p1) => {
-        return this.getVMValue(vm, p1.trim());
+        let watcher = new Watcher(vm, p1, (newValue) => {
+          node.textContent = newValue;
+        });
+        return watcher.oldValue;
       });
     }
   },
   //处理v-text指令
   text (node, expression, vm) {
-    node.textContent = this.getVMValue(vm, expression);
+    let watcher = new Watcher(vm, expression, (newValue) => {
+      node.textContent = newValue;
+    });
+    node.textContent = watcher.oldValue;
   },
   //处理v-html指令
   html (node, expression, vm) {
-    node.innerHTML = this.getVMValue(vm, expression);
+    let watcher = new Watcher(vm, expression, (newValue) => {
+      node.innerHTML = newValue
+    });
+    node.innerHTML = watcher.oldValue;
   },
 
   //v-modle
   model (node, expression, vm) {
+    let watcher = new Watcher(vm, expression, (newValue) => {
+      node.innerHTML = newValue
+    });
+    node.innerHTML = watcher.oldValue;
     // 添加属性value
-    node.setAttribute('value', this.getVMValue(vm, expression));
+    node.setAttribute('value', watcher.oldValue);
     // 监听input事件
     node.addEventListener('input', (e) => {
       vm.$data[expression] = e.target.value;
