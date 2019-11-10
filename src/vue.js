@@ -143,7 +143,6 @@ let CompileUtil = {
     if (reg.test(text)) {
       // 编译
       node.textContent = text.replace(reg, (match, p1) => {
-        console.log(this.getVMValue(vm, p1));
         return this.getVMValue(vm, p1);
       });
     }
@@ -157,9 +156,19 @@ let CompileUtil = {
   },
   // 用于获取vm $data中的数据
   getVMValue (vm, expression) {
+    // expression的形式可能是 name、o.name、o['name']、true || name、的形式
+
     let data = vm.$data;
 
+    // 处理o['name']形式取值
+    let reg = /(.+)\[.{1}(.+).{1}\]/g;
+
+    if (reg.test(expression)) { // 处理o['name']形式取值
+      expression = `${RegExp.$1}.${RegExp.$2}`;
+    }
+
     expression.split('.').forEach(key => {
+      // console.log(key);
       data = data[key];
     });
 
