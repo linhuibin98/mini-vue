@@ -6,6 +6,10 @@ class Vue {
     this.$data = options.data;
     this.$methods = options.methods;
 
+    // 将data中属性代理到vm实例上
+    this.proxy(this.$data);
+    this.proxy(this.$methods);
+
     // 监视data中的数据
     new Observe(this.$data);
 
@@ -14,5 +18,22 @@ class Vue {
       // 需要传入模板和数据data
       new Compile(this.$el, this);
     }
+  }
+
+  // 
+  proxy (data) {
+    Object.keys(data).forEach(key => {
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
+        get () {
+          return data[key];
+        },
+        set (newVal) {
+          if (data[key] === newVal) return;
+          data[key] = newVal;
+        }
+      });
+    })
   }
 }
