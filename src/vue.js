@@ -138,7 +138,7 @@ let CompileUtil = {
   mustache (node, vm) {
     let text = node.textContent;
 
-    let reg = /\{\{(.+)\}\}/g;
+    let reg = /\{\{(.+?)\}\}/g;
 
     if (reg.test(text)) {
       // 编译
