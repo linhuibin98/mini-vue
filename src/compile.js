@@ -160,7 +160,7 @@ let CompileUtil = {
     node.setAttribute('value', watcher.oldValue);
     // 监听input事件
     node.addEventListener('input', (e) => {
-      vm.$data[expression] = e.target.value;
+      this.setVMValue(vm, expression, e.target.value);
     });
   },
 
@@ -192,5 +192,28 @@ let CompileUtil = {
     });
 
     return data;
+  },
+
+  setVMValue (vm, expression, value) {
+    // expression的形式可能是 name、o.name、o['name']、true || name、的形式
+
+    let data = vm.$data;
+
+    // 处理o['name']形式取值
+    let reg = /(.+)\[.{1}(.+).{1}\]/g;
+
+    if (reg.test(expression)) { // 处理o['name']形式取值
+      expression = `${RegExp.$1}.${RegExp.$2}`;
+    }
+    
+    let arr = expression.split('.');
+
+    arr.forEach((key, index) => {
+      if (index < arr.length - 1) {
+        data = data[key];
+      } else {
+        data[key] = value;
+      }
+    });
   }
 }
