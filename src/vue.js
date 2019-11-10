@@ -4,6 +4,7 @@ class Vue {
     // 将根元素、data挂在到Vue实例上
     this.$el = options.el;
     this.$data = options.data;
+    this.$methods = options.methods;
 
     if (this.$el) {
       // Compile 负责解析模板内容, 替换数据
@@ -85,12 +86,12 @@ class Compile {
       // 判断是否是指令
       if (this.isDirective(attrName)) {
         // 解析指令, 值可能表示变量, 也可能是有返回值的表达式
-        let type = attrName.slice(2); // 例如: v-html取html
+        let type = attrName.slice(2); // 例如: v-html取html, v-on:click就取on:click
         let expression = attr.value;
 
         // 是否为绑定事件
         if (this.isEventDirective(type)) {
-          //
+          CompileUtil.eventHandler(node, type, expression, this.vm);
         } else {
           CompileUtil[type] && CompileUtil[type](node, expression, this.vm);
         }
@@ -125,7 +126,7 @@ class Compile {
     return attrName.startsWith('v-'); 
   }
 
-  // 是否是v-on绑定的事件
+  // 是否是v-on绑定的事件指令
   isEventDirective (type) {
     // 例如, type = on:input
     return type.split(':')[0] === 'on';
@@ -147,13 +148,24 @@ let CompileUtil = {
       });
     }
   },
+  //处理v-text指令
   text (node, expression, vm) {
     node.textContent = this.getVMValue(vm, expression);
   },
-
+  //处理v-html指令
   html (node, expression, vm) {
     node.innerHTML = this.getVMValue(vm, expression);
   },
+
+  // 处理v-on绑定事件
+  eventHandler (node, type, expression, vm) {
+    let eventName = type.split(':')[1];
+
+    let fn = vm.$methods && vm.$methods[expression];
+
+    node.addEventListener(eventName, fn.bind(vm));
+  },
+
   // 用于获取vm $data中的数据
   getVMValue (vm, expression) {
     // expression的形式可能是 name、o.name、o['name']、true || name、的形式
