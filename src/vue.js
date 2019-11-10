@@ -6,6 +6,9 @@ class Vue {
     this.$data = options.data;
     this.$methods = options.methods;
 
+    // 监视data中的数据
+    new Observe(this.$data);
+
     if (this.$el) {
       // Compile 负责解析模板内容, 替换数据
       // 需要传入模板和数据data

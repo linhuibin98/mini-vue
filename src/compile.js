@@ -141,6 +141,16 @@ let CompileUtil = {
     node.innerHTML = this.getVMValue(vm, expression);
   },
 
+  //v-modle
+  model (node, expression, vm) {
+    // 添加属性value
+    node.setAttribute('value', this.getVMValue(vm, expression));
+    // 监听input事件
+    node.addEventListener('input', (e) => {
+      vm.$data[expression] = e.target.value;
+    });
+  },
+
   // 处理v-on绑定事件
   eventHandler (node, type, expression, vm) {
     let eventName = type.split(':')[1];
