@@ -144,7 +144,7 @@ let CompileUtil = {
     if (reg.test(text)) {
       // 编译
       node.textContent = text.replace(reg, (match, p1) => {
-        return this.getVMValue(vm, p1);
+        return this.getVMValue(vm, p1.trim());
       });
     }
   },
@@ -178,9 +178,9 @@ let CompileUtil = {
     if (reg.test(expression)) { // 处理o['name']形式取值
       expression = `${RegExp.$1}.${RegExp.$2}`;
     }
-
+    console.log(expression);
+    
     expression.split('.').forEach(key => {
-      // console.log(key);
       data = data[key];
     });
 
